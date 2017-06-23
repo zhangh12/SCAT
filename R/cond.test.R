@@ -39,7 +39,7 @@ cond.test <- function(meta.stat, reference, nsamples, model, ref.info, options){
     for(s in test){
       res <- rbind(res, recover.stat(meta.stat, nsamples, cond, s, ref.geno, ref.info, options))
     }
-    print(dim(res))
+    #print(dim(res))
   }
 
   res

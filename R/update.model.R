@@ -1,4 +1,4 @@
-
+# only use (test or condition on) SNPs available in PLINK files
 update.model <- function(model, snps){
 
   for(i in 1:nrow(model)){

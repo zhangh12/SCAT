@@ -1,8 +1,10 @@
 
 
-scat <- function(summary.files, model, reference, lambda, nsamples, options = NULL){
+scat <- function(summary.files, model, reference, lambda, nsamples, min.maf = 0.05, max.R2 = 0.90){
 
-  # we don't check format at this stage
+  options <- list(maf = min.maf, R2 = max.R2)
+  
+  # we don't check format at this stage, will add it later
   validate.input(summary.files, reference, lambda, nsamples)
 
   m <- meta(summary.files, nsamples, lambda)
@@ -17,9 +19,6 @@ scat <- function(summary.files, model, reference, lambda, nsamples, options = NU
 
   meta.stat <- meta.stat[meta.stat$SNP.ID %in% ref.info$SNP.ID, ]
 
-  #model <- convert.model(ref.info, model)
-
-  print('0.1.2')
   cond.test(meta.stat, reference, nsamples, model, ref.info, options)
 
 }

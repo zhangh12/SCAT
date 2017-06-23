@@ -95,13 +95,19 @@ recover.stat <- function(meta.stat, nsamples, cond, test, ref.geno, ref.info, op
   cond.rs <- ref.info[cond, 'SNP']
   test.rs <- ref.info[test, 'SNP']
 
-  max.rho <- as.vector(ref.cor[test.id, -test.id])
-  max.rho <- max.rho[which.max(abs(max.rho))]
-  data.frame(cond.rs = paste(cond.rs, collapse = ','), test.rs = test.rs,
-             cond = paste(cond, collapse = ','), test = test,
-             p1 = p1, p2 = p2, p3 = p3,
-             cond.dir = paste(cond.dir, collapse = '/'), test.dir = test.dir,
-             rho = max.rho,
+  max.rho <- max(abs(as.vector(ref.cor[test.id, -test.id])))
+  # data.frame(cond.rs = paste(cond.rs, collapse = ','), test.rs = test.rs,
+  #            cond = paste(cond, collapse = ','), test = test,
+  #            p1 = p1, p2 = p2, p3 = p3,
+  #            cond.dir = paste(cond.dir, collapse = '/'), test.dir = test.dir,
+  #            rho = max.rho,
+  #            stringsAsFactors = FALSE)
+  
+  data.frame(Cond.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs,
+             Cond.Pos = paste(cond, collapse = ','), Test.Pos = test,
+             Cond.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir,
+             Max.R2 = max.rho^2, 
+             Cond.P = p1, 
              stringsAsFactors = FALSE)
 
 }

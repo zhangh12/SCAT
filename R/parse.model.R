@@ -17,10 +17,15 @@ parse.model <- function(model, snp.id){
 
   cond <- NULL
   test <- NULL
+  model$cond <- gsub(' ', '', model$cond)
+  model$test <- gsub(' ', '', model$test)
   for(i in 1:nrow(model)){
     cd <- unlist(strsplit(model$cond[i], ','), use.names = FALSE)
     cd <- unlist(sapply(cd, foo), use.names = FALSE)
     cd <- intersect(cd, snp.id)
+    if(length(cd) == 0){
+      next
+    }
     #model$cond[i] <- paste(cond, collapse = ',', sep = '')
     tt <- unlist(strsplit(model$test[i], ','), use.names = FALSE)
     tt <- as.vector(unlist(sapply(tt, foo), use.names = FALSE))
@@ -29,7 +34,7 @@ parse.model <- function(model, snp.id){
     while(length(tt) > 0){
       ntt <- min(1e3, length(tt))
       test <- c(test, paste(tt[1:ntt], collapse = ',', sep = ''))
-      cond <- c(cond, cd)
+      cond <- c(cond, paste(cd, collapse = ',', sep=''))
       tt <- tt[-c(1:ntt)]
     }
     #model$test[i] <- paste(test, collapse = ',', sep = '')

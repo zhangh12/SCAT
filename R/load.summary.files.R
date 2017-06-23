@@ -17,19 +17,22 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
   fid <- 0
   for(i in 1:nfiles){
     st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, nrows = 1e4)
+    header.map <- colnames(st)
     colnames(st) <- convert.header(colnames(st), complete.header)
     tmp <- (header %in% colnames(st))
     if(!all(tmp)){
       msg <- paste0("Columns below were not found in ", summary.files[i], ":\n", paste(header[!tmp], collapse = " "))
       stop(msg)
     }
+    names(header.map) <- colnames(st)
 
     col.class <- sapply(st, class)
     col.id <- which(colnames(st) %in% complete.header)
     col.class[-col.id] <- "NULL"
     col.class[c('SNP', 'RefAllele', 'EffectAllele')] <- 'character'
     col.class[c('Chr', 'Pos')] <- 'integer'
-    st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, colClasses = col.class)
+    names(col.class) <- header.map[names(col.class)]
+    try(st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, colClasses = col.class), silent = TRUE)
     colnames(st) <- convert.header(colnames(st), complete.header)
     if(!is.null(sel.snps)){
       st <- st[st$SNP %in% sel.snps, ]
@@ -54,9 +57,9 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     }
 
     if(!('Direction' %in% colnames(st))){
-      msg <- paste0('Direction is absent in ', summary.files[i], '. Function meta() assumed equal sample sizes for all SNPs in that study. Invalidation of this assumption can lead to false positive if summary data of this study is used in pathway analysis')
-      warning(msg)
-      st$Direction <- paste(rep('*', length(nsamples[[i]])), sep = '', collapse = '')
+      msg <- paste0('Direction is absent in ', summary.files[i], '. Function scat() therefore assumed equal sample sizes for all SNPs in that study. Please verify if this assumption is reasonable in your data. Violation of this assumption can lead to false positive in conditional analysis')
+      warning(msg, immediate. = TRUE)
+      st$Direction <- ifelse(st$BETA == 0, '0', ifelse(st$BETA > 0, '+', '-'))
     }
 
     nc <- unique(nchar(st$Direction))
@@ -65,7 +68,7 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
       stop(msg)
     }
 
-    st <- st[, complete.header]
+    st <- st[, which(toupper(colnames(st)) %in% toupper(complete.header))]
 
     dup <- duplicated(st$SNP)
     if(any(dup)){

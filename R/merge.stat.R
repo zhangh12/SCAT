@@ -4,6 +4,8 @@ merge.stat <- function(stat, ref.allele, conf.snps, lambda){
 
   msg <- paste("Merging summary statistics:", date())
   message(msg)
+  
+  stat <- update.direction(stat, ref.allele)
 
   RefAllele <- ref.allele$RefAllel
   EffectAllele <- ref.allele$EffectAllele
