@@ -57,7 +57,7 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     }
 
     if(!('Direction' %in% colnames(st))){
-      msg <- paste0('Direction is absent in ', summary.files[i], '. Function scat() therefore assumed equal sample sizes for all SNPs in that study. Please verify if this assumption is reasonable in your data. Violation of this assumption can lead to false positive in conditional analysis')
+      msg <- paste0('Direction is absent in ', summary.files[i], '. Function scat() therefore assumed equal sample sizes for all SNPs in that file. Please verify if this assumption is reasonable in your data. Violation of this assumption can lead to false positive in conditional analysis. If this assumption is valid, feel free to ignore this warning. ')
       warning(msg, immediate. = TRUE)
       st$Direction <- ifelse(st$BETA == 0, '0', ifelse(st$BETA > 0, '+', '-'))
     }

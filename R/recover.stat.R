@@ -89,13 +89,18 @@ recover.stat <- function(meta.stat, nsamples, cond, test, ref.geno, ref.info, op
     p3 <- pchisq((score0[test.id] - mu3)^2/s3, df = 1, lower.tail = FALSE)
   }
 
+  cond.pval <- meta.stat[cond, 'P']
+  test.pval <- meta.stat[test, 'P']
+  
   cond.dir <- meta.stat[cond, 'Direction']
   test.dir <- meta.stat[test, 'Direction']
 
   cond.rs <- ref.info[cond, 'SNP']
   test.rs <- ref.info[test, 'SNP']
 
-  max.rho <- max(abs(as.vector(ref.cor[test.id, -test.id])))
+  rho <- as.vector(ref.cor[test.id, -test.id])
+  max.rho <- max(abs(rho))
+  sgn.rho <- ifelse(rho[which.max(abs(rho))[1]] > 0, '+', '-')
   # data.frame(cond.rs = paste(cond.rs, collapse = ','), test.rs = test.rs,
   #            cond = paste(cond, collapse = ','), test = test,
   #            p1 = p1, p2 = p2, p3 = p3,
@@ -103,10 +108,24 @@ recover.stat <- function(meta.stat, nsamples, cond, test, ref.geno, ref.info, op
   #            rho = max.rho,
   #            stringsAsFactors = FALSE)
   
-  data.frame(Cond.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs,
-             Cond.Pos = paste(cond, collapse = ','), Test.Pos = test,
-             Cond.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir,
-             Max.R2 = max.rho^2, 
+  # data.frame(Cond.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs,
+  #            Cond.Pos = paste(cond, collapse = ','), Test.Pos = test,
+  #            Cond.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir,
+  #            Max.R2 = max.rho^2, 
+  #            Cond.P = p1, 
+  #            stringsAsFactors = FALSE)
+  
+  
+  reformat <- function(x){
+    formatC(x, format = 'e', digits = 1)
+  }
+  # use Idx (index) SNP to refer the SNP being conditioned on
+  data.frame(Idx.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs,
+             Idx.Pos = paste(cond, collapse = ','), Test.Pos = test,
+             Idx.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir,
+             Idx.P = paste(reformat(cond.pval), collapse = ','), Test.P = reformat(test.pval), 
+             Max.R2 = formatC(max.rho^2, format = 'f', digits = 2), 
+             Cor.Dir = sgn.rho, 
              Cond.P = p1, 
              stringsAsFactors = FALSE)
 

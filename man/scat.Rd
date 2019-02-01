@@ -3,6 +3,8 @@
 \title{Summary based conditional association test accounting for heterogeneity in SNP coverage}
 \description{
 \code{scat} can be used to perform the conventional conditional test based on summary data generated from genome-wide association studies. These summary data are usually created from a meta-analysis, in which multiple studies are merged together to increase testing power in detecting novel associations. However, heterogeneity in SNP coverage widely exists in such data, even if genotype imputation is done. This is because imputation is usually conducted in each of the participating studies. As a result, SNPs may be missing in some of participating studies. Without properly dealing with such heterogeneity in SNP coverage can overestimate the correlation between association evidence between SNPs, and thus lead to flated false positive. The \code{scat} test accounts for the heterogeneity and has been demonstrated its ability in maintaining false positive rate at nominal level. 
+
+\code{scat} is used to test the association of a specified SNP conditioned on a set of index SNPs. 
 }
 \usage{
 scat(summary.files, model, reference, lambda, nsamples, 
@@ -14,7 +16,7 @@ scat(summary.files, model, reference, lambda, nsamples,
 a character vector of file names containing the summary results of SNPs included in one or multiple studies. Each file must be able to be read by \code{\link[utils]{read.table}}. Each file must have columns called \code{SNP}, \code{Chr}, \code{Pos}, \code{RefAllele}, \code{EffectAllele}, \code{Beta}, and at least one of \code{SE}, \code{P}. An optional column called \code{Direction} describing studies information can also be included if the summary results were calculated from multiple studies by inverse weighting method. See \code{Details}.
 }
   \item{model}{
-a \code{data.frame} to specify SNPs to be conditioned on and targeted SNPs to be tested. It allows for some sort of flexibility in format. It must contain two columns \code{cond} and \code{test}, while redundant columns would be ignored. In each line, the SNPs specified in \code{cond} would be conditioned on simultaneously, while SNPs specified in \code{test} would be tested one by one. See \code{Examples}. 
+a \code{data.frame} to specify index SNPs to be conditioned on and targeted SNPs to be tested. It allows for some sort of flexibility in format. It must contain two columns \code{cond} and \code{test}, while redundant columns would be ignored. In each line, the index SNPs specified in \code{cond} would be conditioned on simultaneously, while SNPs specified in \code{test} would be tested one by one. See \code{Examples}. 
 }
   \item{reference}{
 a data.frame containing the paths of binary PLINK files of reference dataset. It must have columns called \code{bed}, \code{bim} and \code{fam}. The current version allows users to specify multiple sets of bed/bim/fam PLINK files as separate rows of the data frame. See \code{Examples}. 
@@ -29,7 +31,7 @@ a list of numeric vectors specifying sample size of each participating study in 
 SNPs with minor allele frequencies (MAF) smaller than \code{min.maf} would be excluded from analysis. Low MAF usually leads to unstable estimation of correlation between SNPs. The default value is 0.05. 
 }
   \item{max.R2}{
-If the r-square between targeted SNP to be tested and any conditioned SNP is larger than \code{max.R2}, \code{scat} will not test them. High correlation would lead to unstable and unaccurate conditional p-values. The default value is 0.9. 
+If the r-square between targeted SNP to be tested and any conditioned SNP is larger than \code{max.R2}, \code{scat} will not test them. Conditioning on highly correlated index SNPs would lead to unstable or misleading conditional p-values. The default value is 0.9. 
 }
 }
 
@@ -66,19 +68,20 @@ If the SNP coverage in a summary file is not uniform, characters like '++-?*' ar
 
 \value{
 This function return a data frame of the following columns:
-\item{Cond.SNP}{RS number of SNPs conditioned on. Separated by comma. }
-\item{Test.SNP}{RS number of tested SNP. }
-\item{Cond.Pos}{Position information of \code{Cond.SNP}. }
+\item{Idx.SNP}{RS number of index SNPs being conditioned on. Separated by comma. }
+\item{Test.SNP}{RS number of SNP being tested. }
+\item{Idx.Pos}{Position information of \code{Idx.SNP}. }
 \item{Test.Pos}{Position information of \code{Test.SNP}. }
-\item{Cond.Dir}{Direction information of \code{Cond.SNP}. Separated by slash. }
+\item{Idx.Dir}{Direction information of \code{Idx.SNP}. Separated by slash. }
 \item{Test.Dir}{Direction information of \code{Test.SNP}. }
-\item{Max.R2}{Maximum r-square between \code{Cond.SNP} and \code{Test.SNP}. Conditional test would be valuable only if \code{Max.R2} is relatively large, otherwise it is equivalent to the marginal test. }
+\item{Max.R2}{Maximum r-square between \code{Idx.SNP} and \code{Test.SNP}. Conditional test would be valuable only if \code{Max.R2} is relatively large, otherwise it is equivalent to the marginal test. However, \code{Max.R2} could not be too large, otherwise numerical concern may exist. }
+\item{Cor.Dir}{Direction of the greatest correlation between \code{Idx.SNP} and \code{Test.SNP} (squared correlation reaches \code{Max.R2})}
 \item{Cond.P}{P-value of conditional association test. }
 }
 
 \references{
 
-Zhang H, Wheeler W, Song L, Yu K. (2017) Proper joint analysis of summary association statistics requires the adjustment of heterogeneity in SNP coverage pattern. Briefings in Bioinformatics. In press. 
+Zhang H, Wheeler W, Song L, Yu K. (2017) Proper joint analysis of summary association statistics requires the adjustment of heterogeneity in SNP coverage pattern. Brief Bioinform. 19(6):1337-1343. 
 
 }
 
@@ -133,6 +136,10 @@ test <- c('5:32525000 - 32526000, 5:98440820',
           '8:144657269, 8:144664594')
 
 model <- data.frame(cond, test, stringsAsFactors = FALSE)
+
+## for each line in model, every single SNP specified in the 
+## column 'test' would be tested by conditioned on all SNPs 
+## in the column 'cond'
 model
 
 ##                                   cond                              test
@@ -141,6 +148,6 @@ model
 ## 3 8:144662353 ,8:144663075,8:144663661          8:144657269, 8:144664594
 
 ## run it
-# scat(summary.files, model, reference, lambda, nsamples, min.maf = 0.01, max.R2 = 0.9)
+scat(summary.files, model, reference, lambda, nsamples, min.maf = 0.01, max.R2 = 0.9)
 
 }
