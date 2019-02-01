@@ -76,6 +76,12 @@ This function return a data frame of the following columns:
 \item{Cond.P}{P-value of conditional association test. }
 }
 
+\references{
+
+Zhang H, Wheeler W, Song L, Yu K. (2017) Proper joint analysis of summary association statistics requires the adjustment of heterogeneity in SNP coverage pattern. Briefings in Bioinformatics. In press. 
+
+}
+
 \examples{
 library(SCAT)
 
@@ -134,13 +140,7 @@ model
 ## 2                        5 : 179741534 5:33930441 ,5:179738100-179740000
 ## 3 8:144662353 ,8:144663075,8:144663661          8:144657269, 8:144664594
 
-scat(summary.files, model, reference, lambda, nsamples, min.maf = 0.01, max.R2 = 0.9)
-
-##                        Cond.SNP  Test.SNP                            Cond.Pos    Test.Pos    Cond.Dir Test.Dir       Max.R2 Cond.Pval
-## 1           rs1729030,rs1666941 rs1008023               5:32521333,5:32521790  5:32525644     +++/+?+      +++ 5.682752e-05 0.7773428
-## 2                     rs3805703  rs888926                         5:179741534 5:179738101         +?+      +?- 9.831709e-02 0.2963600
-## 3                     rs3805703 rs3805705                         5:179741534 5:179738237         +?+      +?+ 1.403524e-01 0.7571846
-## 4 rs1062391,rs1809148,rs2123758 rs2290417 8:144662353,8:144663075,8:144663661 8:144657269 +??/+??/+??      +?? 6.303470e-01 0.6175260
-## 5 rs1062391,rs1809148,rs2123758 rs3793368 8:144662353,8:144663075,8:144663661 8:144664594 +??/+??/+??      +?? 3.329740e-01 0.4105412
+## run it
+# scat(summary.files, model, reference, lambda, nsamples, min.maf = 0.01, max.R2 = 0.9)
 
 }
