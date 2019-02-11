@@ -41,6 +41,11 @@ parse.model <- function(model, snp.id){
   }
 
   model <- data.frame(cond, test, stringsAsFactors = FALSE)
+  
+  if(nrow(model) == 0){
+    msg <- 'no data to test the model'
+    stop(msg)
+  }
 
   model
 

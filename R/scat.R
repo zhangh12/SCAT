@@ -7,7 +7,7 @@ scat <- function(summary.files, model, reference, lambda, nsamples, min.maf = 0.
   # we don't check format at this stage, will add it later
   validate.input(summary.files, reference, lambda, nsamples)
 
-  m <- meta(summary.files, nsamples, lambda)
+  m <- meta(summary.files, model, nsamples, lambda)
   meta.stat <- m$meta.stat
   nsamples <- m$nsamples
 

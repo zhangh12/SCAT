@@ -14,6 +14,7 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
   lam <- NULL
   nsam <- NULL
 
+  snp.id <- NULL
   fid <- 0
   for(i in 1:nfiles){
     st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, nrows = 1e4)
@@ -32,7 +33,8 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     col.class[c('SNP', 'RefAllele', 'EffectAllele')] <- 'character'
     col.class[c('Chr', 'Pos')] <- 'integer'
     names(col.class) <- header.map[names(col.class)]
-    try(st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, colClasses = col.class), silent = TRUE)
+    #st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, colClasses = col.class)
+    st <- data.table::setDF(data.table::fread(summary.files[i], header = TRUE, showProgress = FALSE, verbose = FALSE, select = which(col.class != 'NULL')))
     colnames(st) <- convert.header(colnames(st), complete.header)
     if(!is.null(sel.snps)){
       st <- st[st$SNP %in% sel.snps, ]
@@ -104,7 +106,9 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     rownames(st) <- st$SNP
     st <- st[complete.cases(st), ]
 
+    st$id <- paste0(st$Chr, ':', st$Pos)
     stat[[fid]] <- st
+    snp.id <- unique(c(snp.id, st$id))
     rm(st)
     gc()
 
@@ -117,7 +121,19 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
 
   lambda <- lam
   nsamples <- nsam
+  # snp.id <- unique(snp.id)
+  
+  model <- parse.model(model, snp.id)
 
+  snp.id <- unique(unlist(strsplit(c(model$cond, model$test), ',')))
+  
+  for(i in 1:length(stat)){
+    stat[[i]] <- subset(stat[[i]], id %in% snp.id)
+    stat[[i]]$id <- NULL
+  }
+  rm(snp.id)
+  gc()
+  
   list(stat = stat, lambda = lambda, nsamples = nsamples)
 
 }

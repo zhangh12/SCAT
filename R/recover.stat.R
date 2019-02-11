@@ -4,6 +4,11 @@ recover.stat <- function(meta.stat, nsamples, cond, test, ref.geno, ref.info, op
   snps <- c(cond, test)
   ref.geno <- ref.geno[, snps, drop = FALSE]
 
+  maf <- colMeans(ref.geno[, test, drop = FALSE], na.rm = TRUE)/2
+  maf <- pmin(maf, 1-maf)
+  maf <- formatC(maf, format = 'f', digits = 2)
+  names(maf) <- NULL
+  
   ref.cor <- cor(ref.geno, use = "pairwise.complete.obs", method = "pearson")
   ref.cor[is.na(ref.cor)] <- 0
 
@@ -120,14 +125,16 @@ recover.stat <- function(meta.stat, nsamples, cond, test, ref.geno, ref.info, op
     formatC(x, format = 'e', digits = 1)
   }
   # use Idx (index) SNP to refer the SNP being conditioned on
-  data.frame(Idx.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs,
-             Idx.Pos = paste(cond, collapse = ','), Test.Pos = test,
-             Idx.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir,
+  data.frame(Idx.SNP = paste(cond.rs, collapse = ','), Test.SNP = test.rs, 
+             Idx.Pos = paste(cond, collapse = ','), Test.Pos = test, 
+             Idx.Dir = paste(cond.dir, collapse = '/'), Test.Dir = test.dir, 
              Idx.P = paste(reformat(cond.pval), collapse = ','), Test.P = reformat(test.pval), 
              Max.R2 = formatC(max.rho^2, format = 'f', digits = 2), 
              Cor.Dir = sgn.rho, 
              Cond.P = p1, 
+             MAF = maf, 
              stringsAsFactors = FALSE)
+  
 
 }
 

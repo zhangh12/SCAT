@@ -75,8 +75,9 @@ This function return a data frame of the following columns:
 \item{Idx.Dir}{Direction information of \code{Idx.SNP}. Separated by slash. }
 \item{Test.Dir}{Direction information of \code{Test.SNP}. }
 \item{Max.R2}{Maximum r-square between \code{Idx.SNP} and \code{Test.SNP}. Conditional test would be valuable only if \code{Max.R2} is relatively large, otherwise it is equivalent to the marginal test. However, \code{Max.R2} could not be too large, otherwise numerical concern may exist. }
-\item{Cor.Dir}{Direction of the greatest correlation between \code{Idx.SNP} and \code{Test.SNP} (squared correlation reaches \code{Max.R2})}
+\item{Cor.Dir}{Direction of the greatest correlation between \code{Idx.SNP} and \code{Test.SNP} (squared correlation reaches \code{Max.R2}). }
 \item{Cond.P}{P-value of conditional association test. }
+\item{MAF}{Minor allele frequency of SNP being tested. Computed from reference data. }
 }
 
 \references{

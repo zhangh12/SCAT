@@ -2,7 +2,9 @@
 read.bed <- function(bed, bim, fam, sel.snps = NULL, sel.subs = NULL, encode012 = TRUE){
 
   col.class <- c("NULL", "character", "NULL", "NULL", "character", "character")
-  bim.file <- read.table(bim, header = FALSE, as.is = TRUE, colClasses = col.class)
+  #bim.file <- read.table(bim, header = FALSE, as.is = TRUE, colClasses = col.class)
+  bim.file <- data.table::fread(bim, header = FALSE, showProgress = FALSE, verbose = FALSE, select = which(col.class != 'NULL'))
+  bim.file <- data.table::setDF(bim.file)
   colnames(bim.file) <- c('SNP', 'RefAllele', 'EffectAllele')
   nsnp <- nrow(bim.file)
 
@@ -30,7 +32,8 @@ read.bed <- function(bed, bim, fam, sel.snps = NULL, sel.subs = NULL, encode012 
 
   col.class <- rep("NULL", 6)
   col.class[2] <- "character"
-  sid <- read.table(fam, header = FALSE, as.is = TRUE, colClasses = col.class)[, 1]
+  #sid <- read.table(fam, header = FALSE, as.is = TRUE, colClasses = col.class)[, 1]
+  sid <-  data.table::setDF(data.table::fread(fam, header = FALSE, showProgress = FALSE, verbose = FALSE, select = 2))[, 1]
   if(any(duplicated(sid))){
     msg <- paste0('Duplicated subjects exist in fam file: \n', fam)
     warning(msg)

@@ -1,4 +1,6 @@
 #exportPattern("^[[:alpha:]]+")
-import(stats, utils)
+importFrom(data.table, fread, setDF)
+importFrom(stats, complete.cases, cor, pchisq, qchisq)
+importFrom(utils, read.table, packageVersion)
 useDynLib(SCAT, .registration = TRUE)
 export(scat, read.bed)

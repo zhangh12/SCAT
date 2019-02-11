@@ -1,5 +1,5 @@
 
-meta <- function(summary.files, nsamples, lambda = NULL, sel.snps = NULL){
+meta <- function(summary.files, model, nsamples, lambda = NULL, sel.snps = NULL){
 
   validate.summary.files(summary.files)
 

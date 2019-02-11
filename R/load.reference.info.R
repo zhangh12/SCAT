@@ -20,12 +20,14 @@ load.reference.info <- function(reference, model){
   col.class[c(1, 4)] <- 'integer'
   bim.files <- reference$bim
   for(i in 1:nref){
-    tmp <- try(bim <- read.table(bim.files[i], header = FALSE, as.is = TRUE, colClasses = col.class), silent = TRUE)
+    #tmp <- try(bim <- read.table(bim.files[i], header = FALSE, as.is = TRUE, colClasses = col.class), silent = TRUE)
+    tmp <- try(bim <- data.table::fread(bim.files[i], header = FALSE, showProgress = FALSE, verbose = FALSE, select = which(col.class != 'NULL')), silent = TRUE)
     if(error.try(tmp)){
       msg <- paste0('Cannot load ', bim.files[i])
       stop(msg)
     }
 
+    bim <- setDF(bim)
     colnames(bim) <- c("Chr", "SNP", "Pos", "RefAllele", "EffectAllele")
     bim$SNP.ID <- paste(bim$Chr, ':', bim$Pos, sep = '')
     bim$Reference.ID <- i
