@@ -1,5 +1,6 @@
 
-load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
+# inflation lambda is adjusted here
+load.summary.files <- function(summary.files, model, lambda, nsamples){
 
   msg <- paste("Loading summary files:", date())
   message(msg)
@@ -11,8 +12,6 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
 
   nfiles <- length(summary.files)
   stat <- list()
-  lam <- NULL
-  nsam <- NULL
 
   snp.id <- NULL
   fid <- 0
@@ -36,13 +35,6 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     #st <- read.table(summary.files[i], header = TRUE, as.is = TRUE, colClasses = col.class)
     st <- data.table::setDF(data.table::fread(summary.files[i], header = TRUE, showProgress = FALSE, verbose = FALSE, select = which(col.class != 'NULL')))
     colnames(st) <- convert.header(colnames(st), complete.header)
-    if(!is.null(sel.snps)){
-      st <- st[st$SNP %in% sel.snps, ]
-    }
-
-    if(nrow(st) == 0){
-      next
-    }
 
     if(!any(opt.header %in% colnames(st))){
       msg <- paste0("Neither SE nor P is not provided in ", summary.files[i])
@@ -95,20 +87,17 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
       z2 <- qchisq(st$P[id.no.SE], df = 1, lower.tail = FALSE)
       st$SE[id.no.SE] <- abs(st$BETA[id.no.SE]/sqrt(z2))
     }
-
-    if(length(id.no.P) > 0){
-      st$P[id.no.P] <- pchisq((st$BETA[id.no.P]/st$SE[id.no.P])^2, df = 1, lower.tail = FALSE)
-    }
+    
+    st$SE <- st$SE * sqrt(lambda[i])
+    st$P <- pchisq((st$BETA/st$SE)^2, df = 1, lower.tail = FALSE)
 
     fid <- fid + 1
-    lam <- c(lam, lambda[i])
-    nsam <- c(nsam, nsamples[[i]])
     rownames(st) <- st$SNP
     st <- st[complete.cases(st), ]
 
-    st$id <- paste0(st$Chr, ':', st$Pos)
+    st$SNP.ID <- paste0(st$Chr, ':', st$Pos)
     stat[[fid]] <- st
-    snp.id <- unique(c(snp.id, st$id))
+    snp.id <- unique(c(snp.id, st$SNP.ID))
     rm(st)
     gc()
 
@@ -119,22 +108,17 @@ load.summary.files <- function(summary.files, lambda, nsamples, sel.snps){
     stop(msg)
   }
 
-  lambda <- lam
-  nsamples <- nsam
   # snp.id <- unique(snp.id)
   
   model <- parse.model(model, snp.id)
 
   snp.id <- unique(unlist(strsplit(c(model$cond, model$test), ',')))
   
-  for(i in 1:length(stat)){
-    stat[[i]] <- subset(stat[[i]], id %in% snp.id)
-    stat[[i]]$id <- NULL
-  }
+  m <- update.stat(NULL, stat, lambda, nsamples, snp.id)
   rm(snp.id)
   gc()
   
-  list(stat = stat, lambda = lambda, nsamples = nsamples)
+  list(stat = m$stat, lambda = m$lambda, nsamples = m$nsamples)
 
 }
 

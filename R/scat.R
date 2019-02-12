@@ -7,19 +7,19 @@ scat <- function(summary.files, model, reference, lambda, nsamples, min.maf = 0.
   # we don't check format at this stage, will add it later
   validate.input(summary.files, reference, lambda, nsamples)
 
-  m <- meta(summary.files, model, nsamples, lambda)
-  meta.stat <- m$meta.stat
-  nsamples <- m$nsamples
+  # SNPs may be totally missing in some summary files, 
+  # so lambda and nsamples need to be updated (discard some elements)
+  m <- meta(summary.files, model, lambda, nsamples)
 
-  model <- parse.model(model, meta.stat$SNP.ID)
+  model <- parse.model(model, m$meta.stat$SNP.ID)
 
   ref.info <- load.reference.info(reference, model)
 
   model <- update.model(model, ref.info$SNP.ID)
 
-  meta.stat <- meta.stat[meta.stat$SNP.ID %in% ref.info$SNP.ID, ]
+  m <- update.stat(m$meta.stat, m$stat, m$lambda, m$nsamples, ref.info$SNP.ID)
 
-  cond.test(meta.stat, reference, nsamples, model, ref.info, options)
+  cond.test(m$meta.stat, m$stat, reference, m$nsamples, model, ref.info, options)
 
 }
 

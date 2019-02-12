@@ -1,5 +1,5 @@
 
-cond.test <- function(meta.stat, reference, nsamples, model, ref.info, options){
+cond.test <- function(meta.stat, stat, reference, nsamples, model, ref.info, options){
 
   res <- NULL
   for(i in 1:nrow(model)){
@@ -10,6 +10,7 @@ cond.test <- function(meta.stat, reference, nsamples, model, ref.info, options){
     test <- unlist(strsplit(model$test[i], ','), use.names = FALSE)
     snps <- c(cond, test)
     ref <- ref.info[snps, ]
+    # Reference.ID refer to plink files that contain genotypes of snps
     ref.id <- unique(ref$Reference.ID)
     ref.geno <- NULL
     for(j in ref.id){
@@ -37,7 +38,7 @@ cond.test <- function(meta.stat, reference, nsamples, model, ref.info, options){
     }
 
     for(s in test){
-      res <- rbind(res, recover.stat(meta.stat, nsamples, cond, s, ref.geno, ref.info, options))
+      res <- rbind(res, recover.stat(meta.stat, stat, nsamples, cond, s, ref.geno, ref.info, options))
     }
     #print(dim(res))
   }

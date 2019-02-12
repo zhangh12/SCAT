@@ -1,6 +1,6 @@
 
 
-merge.stat <- function(stat, ref.allele, conf.snps, lambda){
+merge.stat <- function(stat, ref.allele, conf.snps){
 
   msg <- paste("Merging summary statistics:", date())
   message(msg)
@@ -24,9 +24,14 @@ merge.stat <- function(stat, ref.allele, conf.snps, lambda){
 
   nstudy <- length(stat)
   for(i in 1:nstudy){
+    if(!is.null(conf.snps)){
+      stat[[i]] <- subset(stat[[i]], !(SNP %in% conf.snps))
+    }
+    stat[[i]]$SNP.ID <- paste(stat[[i]][, 'Chr'], ':', stat[[i]][, 'Pos'], sep = '')
+    rownames(stat[[i]]) <- stat[[i]][, 'SNP.ID']
+    
     s <- stat[[i]][, 'SNP']
     stat[[i]]$sgn <- ifelse(stat[[i]][, 'RefAllele'] == RefAllele[s] & stat[[i]][, 'EffectAllele'] == EffectAllele[s], 1, -1)
-    stat[[i]][, 'SE'] <- stat[[i]][, 'SE'] * sqrt(lambda[i])
     stat[[i]][, 'P'] <- pchisq(stat[[i]][, 'BETA']^2/stat[[i]][, 'SE']^2, df = 1, lower.tail = FALSE)
     BETA[s] <- BETA[s] + stat[[i]][, 'sgn'] * stat[[i]][, 'BETA']/stat[[i]][, 'SE']^2
     SE[s] <- SE[s] + 1/stat[[i]][, 'SE']^2
@@ -67,8 +72,7 @@ merge.stat <- function(stat, ref.allele, conf.snps, lambda){
   meta.stat$SNP.ID <- paste(meta.stat$Chr, ':', meta.stat$Pos, sep = '')
   rownames(meta.stat) <- meta.stat$SNP.ID
 
-  # list(meta.stat = meta.stat, conf.snps = conf.snps)
-  meta.stat
+  list(meta.stat = meta.stat, stat = stat)
 
 }
 

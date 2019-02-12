@@ -1,11 +1,11 @@
 
-meta <- function(summary.files, model, nsamples, lambda = NULL, sel.snps = NULL){
+meta <- function(summary.files, model, lambda, nsamples){
 
   validate.summary.files(summary.files)
 
   lambda <- validate.lambda(summary.files, lambda)
 
-  sf <- load.summary.files(summary.files, lambda, nsamples, sel.snps)
+  sf <- load.summary.files(summary.files, model, lambda, nsamples)
 
   ref.allele <- extract.reference.allele(sf$stat)
 
@@ -13,9 +13,10 @@ meta <- function(summary.files, model, nsamples, lambda = NULL, sel.snps = NULL)
 
   rcs <- remove.conflictive.snps(sf$stat, ref.allele, conf.snps)
 
-  meta.stat <- merge.stat(rcs$stat, rcs$ref.allele, conf.snps, sf$lambda)
-
-  list(meta.stat = meta.stat, nsamples = sf$nsamples)
+  m <- merge.stat(rcs$stat, rcs$ref.allele, conf.snps)
+  
+  list(meta.stat = m$meta.stat, stat = m$stat, lambda = sf$lambda, nsamples = sf$nsamples)
+  
 
 }
 
